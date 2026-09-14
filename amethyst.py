@@ -564,7 +564,20 @@ def main():
         for i in result:
 
             def _process(lst):
-                return map(lambda x: 0 if x is None else x, lst)
+                result = []
+                for i in lst:
+                    if i is None:
+                        result.append(0)
+                    elif isinstance(i, int) or isinstance(i, float):
+                        result.append(i)
+                    elif isinstance(i, str):
+                        try:
+                            result.append(float(i))
+                        except:
+                            result.append(0)
+                    else:
+                        result.append(0)
+                return result
 
             def _actual_len(lst):
                 return sum(map(lambda x: 0 if x is None else 1, lst))
@@ -593,7 +606,9 @@ def main():
             elif not all((gavg, glen)):
                 _present_warning(f"Incomplete data of class {i["name"]} of {i["teacher"]}")
             else:
-                i["grade_avg"] = sum(grade_avgs) / gavg if gavg != 0 else None
+                if log_level >= 2:
+                    print(f"{grade_avgs},{grade_devs},{ratings}", file=sys.stderr)
+                i["grade_avg"] = sum(_process(grade_avgs)) / gavg if gavg != 0 else None
                 i["grade_dev"] = max(_process(grade_devs))
                 i["rating"] = sum(_process(ratings)) / glen if glen != 0 else None
                 if options.full_teacher_details:
