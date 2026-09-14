@@ -16,9 +16,14 @@ import re
 import sys
 import time
 import random
-from typing import Dict, List, Any, Optional, Tuple, Literal
+from typing import Dict, List, Any, Optional, Tuple, Literal, TYPE_CHECKING
 
 import requests
+
+if TYPE_CHECKING:
+    import tkinter as tk
+    from tkinter import simpledialog
+    from PIL import Image, ImageTk
 
 # 尝试导入 tkinter 和 PIL，若失败则验证码弹窗不可用
 try:
@@ -90,6 +95,9 @@ class ZDBKClient:
     }
     # 其实没啥用：
     SEMESTER_MAP = {"1": "12", "2": "16"}
+
+    timeout_coeff_min: float
+    timeout_coeff_max: float
 
     def __init__(self, username: str, password: str):
         self.username = username
@@ -627,6 +635,7 @@ def main():
     parser.add_argument("-f", "--format", choices=["table", "json"], default="table",
                         help="输出格式：table（TAB表格）或 json（默认：table）")
     parser.add_argument("--log-level", type = int, default="0", help="日志输出等级")
+    parser.add_argument("--time-coeff", required=False, default="1.5/5", help="延时配置")
     subparsers = parser.add_subparsers(dest="command", required=True, help="子命令")
 
     # 子命令：获取主修成绩
@@ -672,6 +681,7 @@ def main():
     log_level = int(args.log_level)
 
     client = ZDBKClient(args.username, args.password)
+    client.timeout_coeff_min, client.timeout_coeff_max = map(float, args.time_coeff.split("/")[:2])
 
     try:
         client.login()
