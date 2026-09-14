@@ -532,6 +532,7 @@ class ZDBKClient:
         :param kcdm: 课程代码
         :param xkkh: 内部查询字符串（必须来自可选课程接口）
         """
+        global ylxs_actual
         path = f"{self.ZDBK_BASE}/jwglxt/xsxk/zzxkghb_cxZzxkGhbJxbList.html"
         params = {
             "gnmkdm": "N253530",
@@ -543,7 +544,7 @@ class ZDBKClient:
             "xq": xq,
             "kcdm": kcdm,
             "xkkh": xkkh,
-            "ylxs": "0",
+            "ylxs": ylxs_actual,
         }
         if log_level >= 2:
             self._log(f"Requested data {data}")
@@ -606,7 +607,9 @@ def print_result(result):
         print(result)
 
 def main():
-    global log_level
+    global log_level, ylxs_actual
+
+    ylxs_actual = "0"
 
     def work():
         nonlocal args, client
@@ -675,9 +678,11 @@ def main():
     elective_parser.add_argument("--subject", default="", help="学科名称")
     elective_parser.add_argument("--lesson", default="", help="课程标识")
     elective_parser.add_argument("--partial", action='store_false', help="不获取所有教学班")
+    elective_parser.add_argument("--round", default="0", help="选课轮次（从 0 开始，如低分定点选课为 2）")
 
 
     args = parser.parse_args()
+    ylxs_actual = args.round
     log_level = int(args.log_level)
 
     client = ZDBKClient(args.username, args.password)
